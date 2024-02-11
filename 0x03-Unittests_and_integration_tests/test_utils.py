@@ -76,7 +76,7 @@ class TestMemoize(unittest.TestCase):
     def test_memoize(self, mock_a_method):
         # Configure the mock to return 42
         mock_a_method.return_value = 42
-        
+
         # Create an instance of TestClass
         obj = self.TestClass()
 
