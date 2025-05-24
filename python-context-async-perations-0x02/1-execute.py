@@ -28,3 +28,15 @@ class ExecuteQuery:
             print(f'connection to {self.db_name} closed')
         if exc_type is not None:
             print(f'An error occurred: {exc_value}')
+
+
+if __name__ == '__main__':
+    db_name = 'users.db'
+    query = 'SELECT * FROM users WHERE age = ?'
+    param = (25,)
+    with ExecuteQuery(db_name, query, param) as results:
+        if results:
+            for row in results:
+                print(row)
+        else:
+            print('No results found.')
