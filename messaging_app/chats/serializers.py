@@ -17,10 +17,41 @@ class UserSerializer(serializers.Serializer):
     is_muted = serializers.BooleanField(default=False)
     is_pinned = serializers.BooleanField(default=False)
     is_starred = serializers.BooleanField(default=False)
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = '__all__'
+
+    def get_full_name(self, obj: User) -> str:
+        """ Returns the full name of the user by combining first and last names."""
+        return f"{obj.first_name} {obj.last_name}".strip()
+
+    def validate_email(self, value: str) -> str:
+        """ Validates that the email ends with '.com' """
+        if not value.endswith('.com'):
+            raise serializers.ValidationError("Email must end with .com")
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        if not value:
+            raise serializers.ValidationError("Email cannot be empty")
+        if not value.startswith.upper():
+            raise serializers.ValidationError("Email must start with an uppercase letter")
+        if not value[0].isalpha():
+            raise serializers.ValidationError("Email must start with a letter")
+        if value.find('@') == -1:
+            raise serializers.ValidationError("Email must contain '@'")
+        return value
+
+    def validate_username(self, value: str) -> str:
+        """ Validates that the username is unique and not empty. """
+        if not value:
+            raise serializers.ValidationError("Username cannot be empty")
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists")
+        if not value[0].isalpha():
+            raise serializers.ValidationError("Username must start with a letter")
+        return value
 
 
 class ConversationSerializer(serializers.Serializer):
