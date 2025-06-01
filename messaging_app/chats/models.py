@@ -72,8 +72,8 @@ class Message(models.Model):
     sender = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='sent_messages'
     )
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_add_now=True)
+    message_body = models.TextField()
+    sent_at = models.DateTimeField(auto_add_now=True)
     is_read = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     is_edited = models.BooleanField(default=False)
