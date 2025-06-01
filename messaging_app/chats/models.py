@@ -6,7 +6,7 @@ class User(models.Model):
     """
     Model representing a user in the chat application.
     """
-    user_id = models.UUIDFIELD(default=uuid.uuid4, primary_key=True, editable=False, unique=True)
+    user_id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, unique=True)
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
@@ -40,7 +40,7 @@ class Conversation(models.Model):
     """
     conversation_id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True, editable=False)
     name = models.CharField(max_length=255, blank=True, null=True)
-    participants = models.ManyToManyField(user, related_name='conversations')
+    participants = models.ManyToManyField(User, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_group = models.BooleanField(default=False)
@@ -72,7 +72,7 @@ class Message(models.Model):
         User, on_delete=models.CASCADE, related_name='sent_messages'
     )
     message_body = models.TextField()
-    sent_at = models.DateTimeField(auto_add_now=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     is_edited = models.BooleanField(default=False)

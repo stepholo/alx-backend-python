@@ -1,4 +1,4 @@
-from django_rest_framework import serializers
+from rest_framework import serializers
 from .models import User, Conversation, Message
 
 
@@ -80,10 +80,17 @@ class MessageSerializer(serializers.Serializer):
     message_id = serializers.UUIDField(read_only=True)
     conversation = serializers.PrimaryKeyRelatedField(queryset=Conversation.objects.all())
     sender = UserSerializer(read_only=True)
-    content = serializers.CharField(required=True)
-    timestamp = serializers.DateTimeField(auto_now_add=True)
+    message_body = serializers.CharField(required=True)
+    sent_at = serializers.DateTimeField(read_only=True)
     is_read = serializers.BooleanField(default=False)
-
+    is_deleted = serializers.BooleanField(default=False)
+    is_forwarded = serializers.BooleanField(default=False)
+    is_edited = serializers.BooleanField(default=False)
+    is_pinned = serializers.BooleanField(default=False)
+    is_starred = serializers.BooleanField(default=False)
+    edited_content = serializers.CharField(required=False, allow_blank=True)
+    edited_timestamp = serializers.DateTimeField(required=False, allow_null=True)
+    forwarded_from = UserSerializer(required=False, allow_null=True)
     class Meta:
         model = Message
         fields = '__all__'
