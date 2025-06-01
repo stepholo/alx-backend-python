@@ -2,43 +2,57 @@ from django_rest_framework import serializers
 from .models import User, Conversation, Message
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.Serializer):
+    """
+    Serializer for User model.
+    """
+    user_id = serializers.UUIDField(read_only=True)
+    username = serializers.CharField(max_length=150, required=True)
+    email = serializers.EmailField(required=True)
+    first_name = serializers.CharField(max_length=30, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=30, required=False, allow_blank=True)
+    is_active = serializers.BooleanField(default=True)
+    is_deleted = serializers.BooleanField(default=False)
+    is_archived = serializers.BooleanField(default=False)
+    is_muted = serializers.BooleanField(default=False)
+    is_pinned = serializers.BooleanField(default=False)
+    is_starred = serializers.BooleanField(default=False)
+
     class Meta:
         model = User
-        fields = [
-            'user_id', 'username', 'email', 'first_name', 'second_name',
-            'last_name', 'phone_number', 'profile_picture', 'created_at',
-            'updated_at', 'is_active', 'is_superuser', 'is_online',
-            'last_login', 'is_verified', 'is_blocked', 'is_deleted',
-            'is_archived', 'is_muted', 'is_pinned', 'is_starred'
-        ]
+        fields = '__all__'
 
 
-class ConversationSerializer(serializers.ModelSerializer):
-    """Serializer for the Conversation model.
+class ConversationSerializer(serializers.Serializer):
     """
-    participants = UserSerializer(many=True, read_only=True)
+    Serializer for Conversation model.
+    """
+    conversation_id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    participants = UserSerializer(many=True, required=True)
+    is_group = serializers.BooleanField(default=False)
+    is_archived = serializers.BooleanField(default=False)
+    is_muted = serializers.BooleanField(default=False)
+    is_deleted = serializers.BooleanField(default=False)
+    is_pinned = serializers.BooleanField(default=False)
+    is_starred = serializers.BooleanField(default=False)
 
     class Meta:
         model = Conversation
-        fields = [
-            'conversation_id', 'name', 'participants', 'created_at',
-            'updated_at', 'is_group', 'is_archived', 'is_muted',
-            'is_deleted', 'is_pinned', 'is_starred', 'is_forwarded',
-            'forwarded_from'
-        ]
+        fields = '__all__'
 
 
-class MessageSerializer(serializers.ModelSerializer):
-    """Serializer for the Message model.
+class MessageSerializer(serializers.Serializer):
     """
-    conversation = ConversationSerializer(read_only=True)
+    Serializer for Message model.
+    """
+    message_id = serializers.UUIDField(read_only=True)
+    conversation = serializers.PrimaryKeyRelatedField(queryset=Conversation.objects.all())
     sender = UserSerializer(read_only=True)
+    content = serializers.CharField(required=True)
+    timestamp = serializers.DateTimeField(auto_now_add=True)
+    is_read = serializers.BooleanField(default=False)
 
     class Meta:
         model = Message
-        fields = [
-            'message_id', 'conversation', 'sender', 'message_body',
-            'timestamp', 'is_read', 'is_deleted', 'is_forwarded',
-            'forwarded_from'
-        ]
+        fields = '__all__'
