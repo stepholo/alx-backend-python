@@ -18,7 +18,6 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_online = models.BooleanField(default=False)
     last_login = models.DateTimeField(null=True, blank=True)
