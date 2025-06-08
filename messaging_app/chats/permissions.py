@@ -3,12 +3,17 @@ from .models import Conversation, Message
 
 
 class IsParticipantOfConversation(permissions.BasePermission):
-    """Only participants of a conversation can view/update/delete it or its message"""
+    """Custom permission to:
+        - Allow only authenticated users
+        - Allows only conversation participants to access messages and conversation
+    """
 
     def has_permission(self, request, view):
+        """Authenticate to access any view"""
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
+        """Tie messages to conversations"""
         if isinstance(obj, Conversation):
             return request.user in obj.participants.all()
         if isinstance(obj, Message):
