@@ -15,7 +15,16 @@ class IsParticipantOfConversation(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         """Tie messages to conversations"""
         if isinstance(obj, Conversation):
-            return request.user in obj.participants.all()
+            is_participant = request.user in obj.participants.all()
         if isinstance(obj, Message):
-            return request.user in obj.conversation.participants.all()
+            is_participant = request.user in obj.conversation.participants.all()
+
+        # SAFE_METHODS are GET, HEAD, OPTIONS - always allowed for participants
+        if request.method is permissions.SAFE_METHODS:
+            return is_participant
+
+        # Allow PUT, PATCH, DELETE only for participants
+        if request.method in ["PUT", "PATCH", "DELETE"]:
+            return is_participant
+
         return False

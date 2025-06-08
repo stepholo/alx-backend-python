@@ -42,6 +42,15 @@ class ConversationViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+    def retrieve(self, request, *args, **kwargs):
+        conversation = self.get_object()
+        if request.user not in conversation.paticipants.all():
+            return Response(
+                {"Detail": "You are not a participant of this conversation"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().retrieve(request, *args, **kwargs)
+
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
@@ -64,8 +73,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer: MessageSerializer) -> None:
         """Override to set the sender to the current user."""
         user = self.request.user
-        if hasattr(user, '_wrapped'):
-            user = user._wrapped
+        conversation = serializer.validated_data['conversation']
+        if user not in conversation.participants.all():
+            raise permissions.PermissionDenied('You are not allowed to send a message to this conversation')
         serializer.save(sender=user)
 
     @action(detail=False, methods=['get'])
