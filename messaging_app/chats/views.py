@@ -1,8 +1,25 @@
-from .models import Conversation, Message
-from .serializers import ConversationSerializer, MessageSerializer
+from .models import Conversation, Message, User
+from .serializers import ConversationSerializer, MessageSerializer, UserSerializer
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from .permissions import IsParticipantOfConversation
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for User model.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'email', 'first_name', 'last_name']
+    lookup_field = 'user_id'
+
+    def perform_create(self, serializer: UserSerializer) -> None:
+        """Override to set the user to the current user."""
+        serializer.save()
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -11,9 +28,19 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name']
+    search_fields = ['name', 'participants__username']
+    lookup_field = 'conversation_id'
+    ordering_fields = ['created_at', 'updated_at']
+
+    def get_queryset(self):
+        return Conversation.objects.filter(participants=self.request.user)
+
+    def get_object(self):
+        obj = super().get_object()
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 class MessageViewSet(viewsets.ModelViewSet):
@@ -22,13 +49,24 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter]
     search_fields = ['content']
 
+    def get_queryset(self):
+        return Message.objects.filter(conversation__participants=self.request.user)
+
+    def get_object(self):
+        obj = super().get_object()
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     def perform_create(self, serializer: MessageSerializer) -> None:
         """Override to set the sender to the current user."""
-        serializer.save(sender=self.request.user)
+        user = self.request.user
+        if hasattr(user, '_wrapped'):
+            user = user._wrapped
+        serializer.save(sender=user)
 
     @action(detail=False, methods=['get'])
     def custom_status(self, request: None) -> Response:

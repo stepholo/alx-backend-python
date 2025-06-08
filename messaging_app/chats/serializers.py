@@ -1,22 +1,12 @@
 from rest_framework import serializers
+from django.contrib.auth.hashers import make_password
 from .models import User, Conversation, Message
 
 
-class UserSerializer(serializers.Serializer):
+class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for User model.
     """
-    user_id = serializers.UUIDField(read_only=True)
-    username = serializers.CharField(max_length=150, required=True)
-    email = serializers.EmailField(required=True)
-    first_name = serializers.CharField(max_length=30, required=False, allow_blank=True)
-    last_name = serializers.CharField(max_length=30, required=False, allow_blank=True)
-    is_active = serializers.BooleanField(default=True)
-    is_deleted = serializers.BooleanField(default=False)
-    is_archived = serializers.BooleanField(default=False)
-    is_muted = serializers.BooleanField(default=False)
-    is_pinned = serializers.BooleanField(default=False)
-    is_starred = serializers.BooleanField(default=False)
     full_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -35,11 +25,11 @@ class UserSerializer(serializers.Serializer):
             raise serializers.ValidationError("Email already exists")
         if not value:
             raise serializers.ValidationError("Email cannot be empty")
-        if not value.startswith.upper():
-            raise serializers.ValidationError("Email must start with an uppercase letter")
+        if value[0].isupper():
+            raise serializers.ValidationError("Email must start with an lowercase letter")
         if not value[0].isalpha():
             raise serializers.ValidationError("Email must start with a letter")
-        if value.find('@') == -1:
+        if '@' not in value:
             raise serializers.ValidationError("Email must contain '@'")
         return value
 
@@ -53,44 +43,32 @@ class UserSerializer(serializers.Serializer):
             raise serializers.ValidationError("Username must start with a letter")
         return value
 
+    def create(self, validated_data: dict) -> User:
+        """Overide create method to hash the password before saving."""
+        validated_data['password'] = make_password(validated_data['password'])
+        return super().create(validated_data)
 
-class ConversationSerializer(serializers.Serializer):
+
+class ConversationSerializer(serializers.ModelSerializer):
     """
     Serializer for Conversation model.
     """
-    conversation_id = serializers.UUIDField(read_only=True)
-    name = serializers.CharField(max_length=255, required=False, allow_blank=True)
-    participants = UserSerializer(many=True, required=True)
-    is_group = serializers.BooleanField(default=False)
-    is_archived = serializers.BooleanField(default=False)
-    is_muted = serializers.BooleanField(default=False)
-    is_deleted = serializers.BooleanField(default=False)
-    is_pinned = serializers.BooleanField(default=False)
-    is_starred = serializers.BooleanField(default=False)
+    participants = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=User.objects.all(), required=True
+    )
 
     class Meta:
         model = Conversation
         fields = '__all__'
 
 
-class MessageSerializer(serializers.Serializer):
+class MessageSerializer(serializers.ModelSerializer):
     """
     Serializer for Message model.
     """
-    message_id = serializers.UUIDField(read_only=True)
-    conversation = serializers.PrimaryKeyRelatedField(queryset=Conversation.objects.all())
     sender = UserSerializer(read_only=True)
-    message_body = serializers.CharField(required=True)
-    sent_at = serializers.DateTimeField(read_only=True)
-    is_read = serializers.BooleanField(default=False)
-    is_deleted = serializers.BooleanField(default=False)
-    is_forwarded = serializers.BooleanField(default=False)
-    is_edited = serializers.BooleanField(default=False)
-    is_pinned = serializers.BooleanField(default=False)
-    is_starred = serializers.BooleanField(default=False)
-    edited_content = serializers.CharField(required=False, allow_blank=True)
-    edited_timestamp = serializers.DateTimeField(required=False, allow_null=True)
-    forwarded_from = UserSerializer(required=False, allow_null=True)
+    conversation = ConversationSerializer(read_only=True)
+
     class Meta:
         model = Message
         fields = '__all__'

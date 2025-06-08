@@ -1,17 +1,16 @@
 from rest_framework import permissions
+from .models import Conversation, Message
 
 
-class IsParticipant(permissions.BasePermission):
-    """Allows access only to participants of the conversation"""
+class IsParticipantOfConversation(permissions.BasePermission):
+    """Only participants of a conversation can view/update/delete it or its message"""
 
-    def has_object_permission(self, request: any, view: any, obj: any) -> any:
-        """Returns all user objects"""
-        return request.user in obj.participants.all()
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
 
-
-class IsSenderOrReceiver(permissions.BasePermission):
-    """Allow access only to sender or receiver of the message"""
-
-    def has_object_permission(self, request: any, view: any, obj: any) -> any:
-        """Allows access only to sender or receiver of the message"""
-        return obj.sender == request.user or obj.receiver == request.user
+    def has_object_permission(self, request, view, obj):
+        if isinstance(obj, Conversation):
+            return request.user in obj.participants.all()
+        if isinstance(obj, Message):
+            return request.user in obj.conversation.participants.all()
+        return False
