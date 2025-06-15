@@ -1,5 +1,5 @@
 """
-URL configuration for Django_signals_orm_0x04 project.
+URL configuration for signal_project project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from messaging import urls as messaging_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', messaging_urls.urlpatterns, name='messaging-api'),
 ]

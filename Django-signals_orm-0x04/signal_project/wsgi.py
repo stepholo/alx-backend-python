@@ -1,5 +1,5 @@
 """
-WSGI config for Django_signals_orm_0x04 project.
+WSGI config for signal_project project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Django_signals_orm_0x04.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'signal_project.settings')
 
 application = get_wsgi_application()
