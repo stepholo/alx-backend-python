@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: django-blue
-          image: messaging_app-web:blue  # Replace this
+          image: messaging_app-web:2.0  # Replace this
           ports:
             - containerPort: 8000
 
