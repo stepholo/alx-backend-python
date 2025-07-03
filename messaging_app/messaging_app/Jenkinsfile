@@ -9,16 +9,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: "${env.GIT_CREDENTIALS_ID}", url: 'https://github.com/stepholo/alx-backend-python.git', branch: 'main'
+                git credentialsId: "${env.GIT_CREDENTIALS_ID}", url: 'https://github.com/stepholo/alx-backend-python.git', git branch: 'main'
             }
         }
         stage('Install Dependencies') {
             steps {
                 dir('messaging_app') {
                     sh 'python -m venv ${VENV_DIR}'
-                    sh './${VENV_DIR}/bin/pip install --upgrade pip'
-                    sh './${VENV_DIR}/bin/pip install -r requirements.txt'
-                    sh './${VENV_DIR}/bin/pip install pytest pytest-html'
+                    sh './${VENV_DIR}/bin/pip3 install --upgrade pip'
+                    sh './${VENV_DIR}/bin/pip3 install -r messaging_app/requirements.txt'
+                    sh './${VENV_DIR}/bin/pip3 install pytest pytest-html'
                 }
             }
         }
