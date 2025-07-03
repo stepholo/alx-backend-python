@@ -2,10 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_CREDENTIALS_ID = {
-            git config --global user.name 'stepholo',
-            git config --global user.email 'oloobrian89@gmail.com'
-        } // Replace with your Jenkins GitHub credentials ID
+        GIT_CREDENTIALS_ID = 'github-creds' // Replace with your Jenkins GitHub credentials ID
         VENV_DIR = 'venv'
     }
 
