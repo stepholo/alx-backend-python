@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_CREDENTIALS_ID = 'your-jenkins-github-credentials-id' // Replace with your Jenkins GitHub credentials ID
+        GIT_CREDENTIALS_ID = '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' // Replace with your Jenkins GitHub credentials ID
         VENV_DIR = 'venv'
     }
 
