@@ -67,7 +67,8 @@ class MessageSerializer(serializers.ModelSerializer):
     Serializer for Message model.
     """
     sender = UserSerializer(read_only=True)
-    conversation = ConversationSerializer(read_only=True)
+    conversation = serializers.PrimaryKeyRelatedField(
+        queryset=Conversation.objects.all())
 
     class Meta:
         model = Message

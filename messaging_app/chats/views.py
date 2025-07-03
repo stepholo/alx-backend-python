@@ -3,6 +3,7 @@ from .serializers import ConversationSerializer, MessageSerializer, UserSerializ
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from .permissions import IsParticipantOfConversation
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import MessageFilter
@@ -79,7 +80,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         user = self.request.user
         conversation = serializer.validated_data['conversation']
         if user not in conversation.participants.all():
-            raise permissions.PermissionDenied('You are not allowed to send a message to this conversation')
+            raise PermissionDenied('You are not allowed to send a message to this conversation')
         serializer.save(sender=user)
 
     @action(detail=False, methods=['get'])
